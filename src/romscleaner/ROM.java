@@ -79,7 +79,25 @@ public class ROM implements Comparable<ROM> {
         }
         return score;
     }
-
+    
+    public boolean hasTag(Tags tag){
+        for(Tags t : getTags()){
+            if(t.equals(tag)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean hasAnyTag(Tags[] tags){
+        for(int i = 0; i < tags.length; i++){
+            if(hasTag(tags[i])){
+                return true;
+            }
+        }
+        return false;
+    }
+    
     @Override
     public int compareTo(ROM r) {
         

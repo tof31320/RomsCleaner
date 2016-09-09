@@ -30,6 +30,8 @@ public class RomsCleaner {
     
     private static String filespattern = ".smc";
     
+    private static Tags[] tagsToExclude = {Tags.JAPAN};
+    
     /**
      * @param args the command line arguments
      */
@@ -96,7 +98,7 @@ public class RomsCleaner {
         return title;
     }
 
-    private static HashMap<String, Game> readGamesInDirectory(String romsDirectory) {
+    public static HashMap<String, Game> readGamesInDirectory(String romsDirectory) {
         
         HashMap<String, Game> games = new HashMap<String, Game>();
         
@@ -128,11 +130,11 @@ public class RomsCleaner {
         return games;
     }
 
-    private static void cleanGameList(List<Game> gameList) {
+    public static void cleanGameList(List<Game> gameList) {
         for(Game g : gameList){
             if(g.getRoms().size() == 1){
                 ROM rom = g.getRoms().get(0);
-                if(rom.score() == 0){
+                if(rom.score() == 0 || rom.hasAnyTag(tagsToExclude)){
                     g.deleteRom(rom);
                     System.out.println("ATTENTION: " + g.getName() + " n'a plus de ROM!");
                     
@@ -142,7 +144,7 @@ public class RomsCleaner {
                 
             }else if(g.getRoms().size() > 1){
                 ROM rom = g.getRoms().get(0);
-                if(rom.score() == 0){
+                if(rom.score() == 0 || rom.hasAnyTag(tagsToExclude)){
                     g.deleteRom(rom);
                     System.out.println("ATTENTION: " + g.getName() + " n'a plus de ROM!");
                     
@@ -161,16 +163,17 @@ public class RomsCleaner {
         }
         
         // Déplace les fichiers
+        
+        File deletedDir = new File(romsDirectory + "/others");
+        deletedDir.mkdirs();
+        
         for(Game g : gameList){
-            File dir = new File(romsDirectory + "\\" + g.getName());
-            
-            if(!g.getDeleted().isEmpty() && !dir.exists()){
-                dir.mkdirs();
-            }
             
             for(ROM r : g.getDeleted()){
+                File dest = new File(deletedDir.getAbsolutePath() + "/" + r.getFile().getName());
                 try {
-                    Files.move(r.getFile().toPath(), dir.toPath());
+                    Files.move(r.getFile().toPath(), dest.toPath());
+                    
                 } catch (IOException ex) {
                     Logger.getLogger(RomsCleaner.class.getName()).log(Level.SEVERE, null, ex);
                 }
